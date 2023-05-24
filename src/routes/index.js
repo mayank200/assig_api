@@ -17,6 +17,7 @@ module.exports = function (app) {
     next();
   });
 
+  app.post("/api/login", UserCotroller.login);
   app.post("/api/crud_operation", UserCotroller.crud_operation);
 
 

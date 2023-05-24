@@ -4,7 +4,48 @@ var jwt = require("jsonwebtoken");
 const utils = require('../utils/index');
 const path = require('path');
 const e = require('express');
+const login = require('../JsonObjects/logindetails.json')
 
+
+exports.login = async (req, res) => {
+  try {
+
+    const {name, id, pass} = req.body;
+
+    login_status = false;
+
+    login.map(el=>{
+      if(el.user == id && el.pass == pass){
+        login_status = true;
+      }
+    })
+
+   user_ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+   user_browser = req.useragent.browser;
+
+  if(login_status && name!=undefined && name!=''){
+
+    token = jwt.sign({
+      name: name,
+      userid: id,
+      permision: 'W',
+      language: 'EN',
+    }, process.env.Secret, {                 
+      expiresIn: 3600 // 1 hours
+    });
+    res.status(200).send({
+      status: login_status,
+      token: token
+    });
+
+  }
+     
+    // end of then
+  } catch (error) {
+    console.log(error)
+    res.status(200).send({ 'status': false, 'msg': error });
+  }
+};
 
 exports.crud_operation = async (req, res) => {
   try {
