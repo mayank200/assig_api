@@ -51,16 +51,8 @@ verifyToken_mob = (req, res, next) => {
         msg: "Invalid Token"
       });
     }
-    //  req.id = (decoded.id);
-    //  req.userid = (decoded.userid);
-    //  req.user_ip = (decoded.user_ip);
-    //  req.role = (decoded.role);
-    //  req.name = (decoded.name);
-    // req.UserId = decrypt(decoded.id);
-    // req.email = (decoded.email);
-    // req.name = (decoded.fullname);
-    // req.mobile_no = (decoded.mobilenumber);
-    //req.admin_fullname=decoded.admin_fullname;
+     req['credentials'] = decoded;
+  
     next();
   });
 };

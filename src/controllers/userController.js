@@ -14,6 +14,10 @@ exports.login = async (req, res) => {
 
     login_status = false;
 
+    if(name == undefined || id == undefined || pass==undefined){
+      return  res.status(200).send({status: false, msg: 'Invalid Credentials' });
+    }
+
     login.map(el=>{
       if(el.user == id && el.pass == pass){
         login_status = true;
@@ -33,7 +37,7 @@ exports.login = async (req, res) => {
     }, process.env.Secret, {                 
       expiresIn: 3600 // 1 hours
     });
-    res.status(200).send({
+    return res.status(200).send({
       status: login_status,
       token: token
     });
@@ -52,25 +56,22 @@ exports.crud_operation = async (req, res) => {
 
     const body = req.body;
 
-    let action = body.action;
 
-    // let user_ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-    // let user_browser = req.useragent.browser;
-
-    if(action='create'){
+    if( body.action=='create'){
 
       db.sequelize.query(`INSERT INTO public.products(name, category, cost, description, createdon) VALUES ( ?, ?, ?, ?, now()::timestamp);` ,
-      { replacements: [body.name.toSting(), body.category.toSting(), body.cost.toString(), body.description.toString()] }, { type: db.sequelize.QueryTypes.SELECT })
+      { replacements: [body.name.toString(), body.category.toString(), body.cost.toString(), body.description.toString()] }, { type: db.sequelize.QueryTypes.SELECT })
       .then(temp => {
         result = JSON.parse(JSON.stringify(temp[0]));
 
+      
         res.status(200).send({ 'status': true, 'msg': 'Product Inserted' });
 
       }).catch(e=>{
         console.log(e)
       })
 
-    } else if(action='update'){
+    } else if( body.action=='update'){
 
       db.sequelize.query(`UPDATE public.products SET name=?, category=?, cost=?, description=? WHERE id=?;` ,
       { replacements: [body.name, body.category, body.cost.toString(), body.description, Number(body.id)] }, { type: db.sequelize.QueryTypes.SELECT })
@@ -83,7 +84,7 @@ exports.crud_operation = async (req, res) => {
         console.log(e)
       })
 
-    } else if(action='get'){
+    } else if( body.action=='get'){
 
       db.sequelize.query(`SELECT * from public.products WHERE id=?;` ,
       { replacements: [Number(body.id)] }, { type: db.sequelize.QueryTypes.SELECT })
@@ -96,10 +97,10 @@ exports.crud_operation = async (req, res) => {
         console.log(e)
       })
 
-    } else if(action='getall'){
+    } else if( body.action=='getall'){
 
-      db.sequelize.query(`SELECT * from public.products;` ,
-      { replacements: [Number(body.id)] }, { type: db.sequelize.QueryTypes.SELECT })
+      db.sequelize.query(`SELECT * from public.products order by id;` ,
+      { replacements: [] }, { type: db.sequelize.QueryTypes.SELECT })
       .then(temp => {
         result = JSON.parse(JSON.stringify(temp[0]));
 
@@ -109,7 +110,7 @@ exports.crud_operation = async (req, res) => {
         console.log(e)
       })
 
-    } else if(action='delete'){
+    } else if( body.action=='delete'){
 
       db.sequelize.query(`DELETE FROM public.products WHERE id=?;` ,
       { replacements: [Number(body.id)] }, { type: db.sequelize.QueryTypes.SELECT })
@@ -123,20 +124,12 @@ exports.crud_operation = async (req, res) => {
       })
 
     }
-  
-     
 
     // end of then
   } catch (error) {
-    // console.log(error)
-    res.status(200).send({ 'status': false, 'msg': error.msg, 'browser': user_browser });
+    console.log(error)
+    res.status(200).send({ 'status': false, 'msg': error.msg });
   }
 };
 
 
-function generateOTP() {
-  // Generate a random 6-digit number
-  const otp = Math.floor(100000 + Math.random() * 900000);
-
-  return otp.toString();
-}

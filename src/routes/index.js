@@ -3,8 +3,8 @@ const UserCotroller = require("../controllers/userController");
 
 
 const express = require("express");
-// const authroute = express.Router();
-// authroute.use(authJwt.verifyToken);
+const authroute = express.Router();
+authroute.use(authJwt.verifyToken);
 
 
 module.exports = function (app) {
@@ -18,7 +18,7 @@ module.exports = function (app) {
   });
 
   app.post("/api/login", UserCotroller.login);
-  app.post("/api/crud_operation", UserCotroller.crud_operation);
+  app.post("/api/crud_operation",authroute, UserCotroller.crud_operation);
 
 
 
